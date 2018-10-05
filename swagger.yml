@@ -12,6 +12,28 @@ basePath: /api
 
 # Paths supported by the server application
 paths:
+
+  /ibd_remission/ping:
+
+    get:
+      operationId: ibd_remission.ping
+      summary: Gets a ping response.
+      description: |
+        Gets a ping response. The response is a JSON object that contains the server time.
+      # no security required here
+      security: []
+      responses:
+        '200':
+          description: Ping reponse.
+          schema:
+            type: object
+            properties:
+              result:
+                type: string
+              datetime:
+                type: string
+                format: date-time
+
   /ibd_remission/predict:
     post:
       operationId: ibd_remission.predict

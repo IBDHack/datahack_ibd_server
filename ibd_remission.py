@@ -6,7 +6,6 @@ import datetime
 import logging
 # System modules
 import pickle
-import random
 import base64
 
 # 3rd party modules
@@ -617,7 +616,8 @@ def fileDataToString(fileData):
     # "data:text/plain;base64,Y29udm94IHJhY2sgcGFyYW1zIHNldCBJbnN0YW5jZUJvb3RDb21tYW5kPSIvZXRjL2luaXQuZC9kb2NrZXIgc3RvcDsgZG1zZXR1cCByZW1vdmVfYWxsOyB2Z3JlbW92ZSAtLWZvcmNlIGRvY2tlcjsgbWtmcyAtdCBleHQ0IC1MIGRvY2tlciAtaSA0MDk2IC1GIC9kZXYveHZkY3o7IHJtIC1mciAvdmFyL2xpYi9kb2NrZXIvKjsgbWtkaXIgL3Zhci9saWIvZG9ja2VyL292ZXJsYXkyOyBtb3VudCAvZGV2L3h2ZGN6IC92YXIvbGliL2RvY2tlci9vdmVybGF5MjsgZWNobyAnRE9DS0VSX1NUT1JBR0VfT1BUSU9OUz1cIi0tc3RvcmFnZS1kcml2ZXI9b3ZlcmxheTJcIicgPiAvZXRjL3N5c2NvbmZpZy9kb2NrZXItc3RvcmFnZTsgZ3JlcCAtdiBkbVwuYmFzZXNpemUgL2V0Yy9zeXNjb25maWcvZG9ja2VyID4gL2V0Yy9zeXNjb25maWcvZG9ja2VyLXRtcDsgbXYgLWYgL2V0Yy9zeXNjb25maWcvZG9ja2VyLXRtcCAvZXRjL3N5c2NvbmZpZy9kb2NrZXI7IC9ldGMvaW5pdC5kL2RvY2tlciBzdGFydDsgcm0gLXJmIC92YXIvbGliL2Vjcy9kYXRhLyogL3Zhci9jYWNoZS9lY3MvKjsgc3RhcnQgZWNzIgo="
     try:
         return base64.b64decode(fileData.split('base64,')[1]).decode('utf-8')
-    except:
+    except Exception as e:
+        logging.error('Error decoding file data:', str(e))
         return defaultFileData
 
 
@@ -635,8 +635,11 @@ def predict(surveyResult):
     if badInput:
         abort(500, 'Invalid input data: %s', surveyResult)
 
-    logging.info(surveyResult)
+    print('Got input surveyResult:', surveyResult)
     inRemission, sesCdScore = predictIBDValues(surveyResult.get('microbiomeData'))
+
+    print('Calculated result remission:', inRemission)
+    print('Calculated result SES-CD score:', sesCdScore)
 
     return {
         'inRemission': inRemission,
@@ -670,7 +673,8 @@ def predictRemissionValue(microbiomeData):
             )
         # We return whether we are in remission - so inverse
         return False if flareupPrediction else True
-    except:
+    except Exception:
+        logging.error('Error predicting remission.')
         return True
 
 def predictSesCdValue(microbiomeData):
@@ -684,7 +688,8 @@ def predictSesCdValue(microbiomeData):
                 user=fileDataToString(microbiomeData),
             )
         return round(prediction)
-    except:
+    except Exception:
+        logging.error('Error predicting SES CD.')
         return 0
 
 def predictIBDValues(microbiomeData):
